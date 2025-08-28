@@ -15,7 +15,6 @@ class MainFrame(ctk.CTkFrame):
         self.draw_header()
         self.draw_body()
 
-        self.alert_top_level = None
 
     def draw_header(self): # Cabeçalho do app
         self.header_frame = DrawFrame(
@@ -45,7 +44,7 @@ class MainFrame(ctk.CTkFrame):
             fg_color='transparent',
             text_color="#2C2C2C",
         )
-        self.credit_label.grid(row=1, column=0, sticky='ew')
+        self.credit_label.grid(row=1, column=0, sticky='ew', padx=(0, 10))
 
     def draw_body(self): # Onde vai ficar o menu, botões e inputs
         self.body = DrawFrame(
@@ -71,32 +70,24 @@ class MainFrame(ctk.CTkFrame):
 
     def get_input(self):
         url = self.input_url.get()
-        if self.alert_top_level is None or not self.alert_top_level.winfo_exists():
-            if url == None:
-                self.alert_top_level = DrawAlert(self.master, text="Erro", fg_color=error_color)
-                self.alert_top_level.grab_set()
+
+        def finished(success, error):
+            if success:
+                self.alert_top_level = DrawAlert(
+                    self.master,
+                    text=f"Download concluído com sucesso!",
+                    fg_color=error_color,
+                    error_text=error,
+                )
             else:
-                download = yt_dlp_download(url)
-                if download == True:
-                    self.alert_top_level = DrawAlert(self.master, text="Deu certo", fg_color=success_color)
-                    self.alert_top_level.grab_set()
-                
-                else:
-                    self.alert_top_level = DrawAlert(self.master, text="Erro", fg_color=error_color)
-                    self.alert_top_level.grab_set()
+                self.alert_top_level = DrawAlert(
+                    self.master,
+                    text=f"Você informou uma url ou link invalido!",
+                    fg_color=error_color,
+                    error_text=error,
+                )
 
-
-        # if self.alert_top_level is None or not self.alert_top_level.winfo_exists():
-        #     url = self.input_url.get()
-        #     if url == None:
-        #         self.alert_top_level = DrawAlert(self.master, text="Erro", fg_color=error_color)
-        #         self.alert_top_level.grab_set()
-        #     else:
-        #         self.alert_top_level = DrawAlert(self.master, text="Deu certo", fg_color=success_color)
-        #         self.alert_top_level.grab_set()
-        # else:
-        #     self.alert_top_level.focus()
-
+        yt_dlp_download(url, callback=finished)
 
 
 class Main(ctk.CTk):
